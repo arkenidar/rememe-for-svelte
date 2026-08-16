@@ -10,6 +10,9 @@ hero:
       text: Start the tutorial
       link: /01-introduction
     - theme: alt
+      text: Play the Game
+      link: /app/
+    - theme: alt
       text: View the code
       link: https://github.com/arkenidar/rememe-for-svelte
 
@@ -31,6 +34,10 @@ cleared.
 
 You don't need any prior framework experience. A little familiarity with JavaScript
 helps, but every concept is introduced as it appears.
+
+## Try it live
+
+Play the built game right in your browser: **[Play the Game](/app/)**.
 
 ## How to use this tutorial
 

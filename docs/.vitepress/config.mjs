@@ -14,9 +14,13 @@ export default defineConfig({
   base,
   cleanUrls: true,
   lastUpdated: true,
+  // The /app/ path is copied into the built site during deployment, so it
+  // doesn't exist in the docs source and would be flagged as a dead link.
+  ignoreDeadLinks: [/^\/app(\/|$)/],
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
+      { text: 'Play the Game', link: '/app/' },
       { text: 'Game Code', link: 'https://github.com/arkenidar/rememe-for-svelte' }
     ],
     sidebar: [

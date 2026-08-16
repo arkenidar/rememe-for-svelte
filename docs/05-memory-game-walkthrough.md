@@ -4,6 +4,10 @@ This page explains `src/MemoryGame.svelte` section by section. Reading this
 will show you how the Svelte concepts from the previous page come together into
 a working game.
 
+::: tip Live demo
+Open the **[live game](/app/)** in a new tab and follow along as you read.
+:::
+
 ## The data model
 
 The game revolves around an array of **card** objects. Each card is a plain

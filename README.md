@@ -10,7 +10,10 @@ npm install
 npm run dev
 ```
 
-Then open the URL Vite prints (usually <http://localhost:5173>).
+Then open the URL Vite prints (usually `http://localhost:5173`).
+
+The game is also deployed and playable live at:
+**https://arkenidar.github.io/rememe-for-svelte/app/**
 
 ## Scripts
 
@@ -18,6 +21,7 @@ Then open the URL Vite prints (usually <http://localhost:5173>).
 | --- | --- |
 | `npm run dev` | Start the game's development server (hot reload). |
 | `npm run build` | Build the game for production into `dist/`. |
+| `npm run build:app` | Build the game into `docs/app/` (relative paths, for the docs site). |
 | `npm run preview` | Serve the built game locally. |
 | `npm run docs:dev` | Start the documentation site locally (VitePress). |
 | `npm run docs:build` | Build the documentation site. |
@@ -56,6 +60,10 @@ npm run docs:dev
 The docs site is deployed to GitHub Pages automatically via the
 `.github/workflows/deploy-docs.yml` workflow. To enable it once, open the repo's
 **Settings → Pages** and set **Source** to **GitHub Actions**.
+
+The same workflow also builds the game from `src/` and deploys it under the
+`/app/` path of the docs site. `docs/app/` is generated output (ignored by git),
+so it stays in sync with the source on every push to `main`.
 
 ## License
 

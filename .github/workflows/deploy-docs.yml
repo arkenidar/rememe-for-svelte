@@ -30,10 +30,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build app
+        run: npm run build:app
+
       - name: Build docs
         run: npm run docs:build
         env:
           BASE_PATH: ${{ github.event.repository.name }}
+
+      - name: Copy app into site
+        run: cp -r docs/app docs/.vitepress/dist/app
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
