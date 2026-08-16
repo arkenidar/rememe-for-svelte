@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memory Game Walkthrough · Memory Game Tutorial</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="brand" href="index.html">Memory Game Tutorial</a>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="https://arkenidar.github.io/rememe-for-svelte/app/">Play the Game</a>
+                <a class="play" href="https://github.com/arkenidar/rememe-for-svelte">View the code</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="content wrap">
+        <h1>Memory Game Walkthrough</h1>
+        <p>
+            This page explains <code>src/MemoryGame.svelte</code> section by section. Reading this
+            will show you how the Svelte concepts from the previous page come together into
+            a working game.
+        </p>
+
+        <div class="callout">
+            <p><span class="callout-title">Live demo</span>
+                Open the <strong><a href="https://arkenidar.github.io/rememe-for-svelte/app/">live game</a></strong> in a new tab and follow along as you read.
+            </p>
+        </div>
+
+        <h2>The data model</h2>
+        <p>
+            The game revolves around an array of <strong>card</strong> objects. Each card is a plain
+            JavaScript object with four properties:
+        </p>
+        <pre><code>{
+  id: 0,
+  value: '🐶',
+  flipped: false,
+  matched: false
+}</code></pre>
+        <table>
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Meaning</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>id</code></td>
+                    <td>A unique identifier, used as the each-block key.</td>
+                </tr>
+                <tr>
+                    <td><code>value</code></td>
+                    <td>The emoji shown when the card is face up.</td>
+                </tr>
+                <tr>
+                    <td><code>flipped</code></td>
+                    <td>Whether the card is currently face up.</td>
+                </tr>
+                <tr>
+                    <td><code>matched</code></td>
+                    <td>Whether the card has been permanently matched.</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            The <code>flipped</code> property is transient (a card can flip back), while <code>matched</code> is
+            permanent.
+        </p>
+
+        <h2>The list of symbols</h2>
+        <pre><code>const EMOJIS = ['🐶', '🐱', '🦊', '🐸', '🐼', '🦁', '🐧', '🐵'];</code></pre>
+        <p>
+            This is an array of 8 emoji. Because every Memory card needs a partner, the
+            game uses each symbol <strong>twice</strong>, yielding 16 cards (a 4×4 grid).
+        </p>
+
+        <h2>State variables</h2>
+        <pre><code>let cards = $state([]);        // the deck
+let flipped = $state([]);      // currently face-up cards (0–2)
+let moves = $state(0);         // number of attempts
+let matchedPairs = $state(0);  // how many pairs found
+let lock = $state(false);      // blocks input during the flip-back delay</code></pre>
+        <ul>
+            <li><code>cards</code> is the full deck.</li>
+            <li><code>flipped</code> holds the one or two cards currently turned over.</li>
+            <li><code>moves</code> counts every two-card attempt.</li>
+            <li><code>matchedPairs</code> counts completed pairs (max 8).</li>
+            <li><code>lock</code> prevents clicks during the brief "not a match" pause.</li>
+        </ul>
+
+        <h2>Shuffling</h2>
+        <pre><code>function shuffle(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i &gt; 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}</code></pre>
+        <p>This is the <strong>Fisher–Yates shuffle</strong>:</p>
+        <ol>
+            <li>Copy the array so we don't mutate the original.</li>
+            <li>Walk backwards from the last element.</li>
+            <li>Swap each element with a random one at or before its position.</li>
+        </ol>
+        <p>The result is a uniformly random ordering.</p>
+
+        <h2>Starting a new game</h2>
+        <pre><code>function newGame() {
+  const deck = shuffle([...EMOJIS, ...EMOJIS]).map((value, id) =&gt; ({
+    id,
+    value,
+    flipped: false,
+    matched: false
+  }));
+
+  cards = deck;
+  flipped = [];
+  moves = 0;
+  matchedPairs = 0;
+  lock = false;
+}</code></pre>
+        <ul>
+            <li>
+                <code>[...EMOJIS, ...EMOJIS]</code> spreads the symbol list twice to create 16 values,
+                then <code>shuffle</code> randomizes them.
+            </li>
+            <li><code>.map()</code> converts each value into a card object, using its index as <code>id</code>.</li>
+            <li>Every state variable is reset.</li>
+        </ul>
+        <p>
+            <code>newGame</code> runs once on startup (via <code>onMount</code>) and again whenever the player
+            presses <strong>New Game</strong>.
+        </p>
+
+        <h2>Flipping a card</h2>
+        <pre><code>function flipCard(card) {
+  if (lock) return;
+  if (card.flipped || card.matched) return;
+  if (flipped.length &gt;= 2) return;
+
+  card.flipped = true;
+  flipped = [...flipped, card];
+  // ...
+}</code></pre>
+        <p>The first three lines are <strong>guards</strong> that reject invalid clicks:</p>
+        <ol>
+            <li><code>if (lock)</code> — ignore clicks while two mismatched cards are resolving.</li>
+            <li><code>if (card.flipped || card.matched)</code> — ignore cards already face up or matched.</li>
+            <li><code>if (flipped.length &gt;= 2)</code> — safety check: never allow more than two flipped.</li>
+        </ol>
+        <p>
+            Then the card is flipped and added to the <code>flipped</code> array via a new reference
+            (so Svelte detects the change).
+        </p>
+
+        <h2>Comparing two cards</h2>
+        <pre><code>if (flipped.length === 2) {
+  moves += 1;
+  const [first, second] = flipped;
+
+  if (first.value === second.value) {
+    first.matched = true;
+    second.matched = true;
+    matchedPairs += 1;
+    flipped = [];
+  } else {
+    lock = true;
+    setTimeout(() =&gt; {
+      first.flipped = false;
+      second.flipped = false;
+      flipped = [];
+      lock = false;
+    }, 800);
+  }
+}</code></pre>
+        <p>When two cards are face up:</p>
+        <ul>
+            <li><code>moves += 1</code> records the attempt.</li>
+            <li>Destructuring (<code>const [first, second] = flipped</code>) names the two cards.</li>
+        </ul>
+        <p><strong>If they match:</strong></p>
+        <ul>
+            <li>Both are marked <code>matched = true</code>, so they stay face up and turn green.</li>
+            <li><code>matchedPairs</code> increments.</li>
+            <li><code>flipped</code> resets to empty, ready for the next pair.</li>
+        </ul>
+        <p><strong>If they don't match:</strong></p>
+        <ul>
+            <li><code>lock = true</code> freezes input so the player can't flip more cards yet.</li>
+            <li>
+                <code>setTimeout</code> waits 800ms, then flips both back, clears <code>flipped</code>, and
+                unlocks.
+            </li>
+        </ul>
+
+        <div class="callout warning">
+            <p><span class="callout-title">Why a lock?</span>
+                Without <code>lock</code>, a fast player could flip a third card during the 800ms pause.
+                That would corrupt the two-card logic. The lock makes the state machine safe.
+            </p>
+        </div>
+
+        <h2>The win condition</h2>
+        <p>
+            The game is won when all pairs are matched. Since there are <code>EMOJIS.length</code>
+            pairs (8), the template checks:
+        </p>
+        <pre><code>{#if matchedPairs === EMOJIS.length}
+  &lt;p class="win"&gt;You won in {moves} moves! 🎉&lt;/p&gt;
+{/if}</code></pre>
+
+        <h2>The template</h2>
+        <pre><code>&lt;div class="game"&gt;
+  &lt;header&gt;
+    &lt;h1&gt;Memory Game&lt;/h1&gt;
+    &lt;div class="stats"&gt;
+      &lt;span&gt;Moves: {moves}&lt;/span&gt;
+      &lt;span&gt;Pairs: {matchedPairs} / {EMOJIS.length}&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/header&gt;
+
+  &lt;!-- win message --&gt;
+
+  &lt;div class="grid"&gt;
+    {#each cards as card (card.id)}
+      &lt;button
+        class="card"
+        class:flipped={card.flipped || card.matched}
+        class:matched={card.matched}
+        onclick={() =&gt; flipCard(card)}
+      &gt;
+        &lt;span class="face"&gt;
+          {#if card.flipped || card.matched}
+            {card.value}
+          {/if}
+        &lt;/span&gt;
+      &lt;/button&gt;
+    {/each}
+  &lt;/div&gt;
+
+  &lt;button class="reset" onclick={newGame}&gt;New Game&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+        <p>Key details:</p>
+        <ul>
+            <li>
+                <code>{#each cards as card (card.id)}</code> renders one <code>&lt;button&gt;</code> per card, keyed by
+                <code>id</code>.
+            </li>
+            <li>
+                <code>class:flipped</code> is applied when the card is face up or matched, styling it as
+                revealed.
+            </li>
+            <li><code>class:matched</code> applies the green "matched" styling.</li>
+            <li>
+                The emoji is only rendered inside the <code>{#if}</code> — a face-down card shows
+                nothing (better than revealing the value in the DOM).
+            </li>
+            <li>Clicking calls <code>flipCard(card)</code> with that card.</li>
+            <li>The reset button calls <code>newGame</code>.</li>
+        </ul>
+
+        <h2>The styling</h2>
+        <p>The <code>&lt;style&gt;</code> block uses ordinary CSS, scoped to this component:</p>
+        <ul>
+            <li><code>.grid</code> uses <code>display: grid</code> with <code>repeat(4, 90px)</code> for a 4-column layout.</li>
+            <li><code>.card</code> is a fixed-size rounded square.</li>
+            <li><code>.card.flipped</code> gets a light background to reveal the tile.</li>
+            <li><code>.card.matched</code> gets a green background to signal a completed pair.</li>
+            <li>A <code>@media (max-width: 480px)</code> rule shrinks cards on phones.</li>
+        </ul>
+        <p>Because the CSS is scoped, these class names won't clash with other components.</p>
+
+        <h2>Summary</h2>
+        <p>The whole game is a small state machine:</p>
+        <pre><code>face-down cards → click → flip one → click → flip second
+                                        ↓
+                          match?  yes → matched (stay face up)
+                                   no  → lock → 800ms → flip both back</code></pre>
+        <p>
+            <code>$state</code> variables drive everything, <code>{#each}</code> renders the grid, <code>{#if}</code> shows
+            the win message, and <code>class:</code> directives switch visual states. There's no manual
+            DOM manipulation anywhere — Svelte handles it.
+        </p>
+
+        <div class="pager">
+            <a href="04-svelte-basics.html">← Previous: Svelte Basics</a>
+            <a href="06-extending-the-game.html">Next: Extending the Game →</a>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>A beginner-friendly Vite + Svelte tutorial. MIT Licensed.</p>
+        </div>
+    </footer>
+</body>
+
+</html>

@@ -23,9 +23,6 @@ The game is also deployed and playable live at:
 | `npm run build` | Build the game for production into `dist/`. |
 | `npm run build:app` | Build the game into `docs/app/` (relative paths, for the docs site). |
 | `npm run preview` | Serve the built game locally. |
-| `npm run docs:dev` | Start the documentation site locally (VitePress). |
-| `npm run docs:build` | Build the documentation site. |
-| `npm run docs:preview` | Serve the built documentation site. |
 
 ## Project structure
 
@@ -36,10 +33,11 @@ The game is also deployed and playable live at:
 │   ├── app.css              # global styles
 │   ├── App.svelte           # root component
 │   └── MemoryGame.svelte    # game logic + markup + styles
-├── docs/                    # VitePress documentation (tutorial)
-│   ├── .vitepress/config.mjs
-│   ├── index.md
-│   └── 01-…07-….md
+├── docs/                    # Static HTML documentation (tutorial)
+│   ├── index.html
+│   ├── 01-…07-….html
+│   ├── style.css
+│   └── app/                 # generated game build (ignored by git)
 ├── index.html               # HTML shell
 ├── vite.config.js           # Vite config
 ├── package.json
@@ -48,13 +46,14 @@ The game is also deployed and playable live at:
 
 ## Documentation
 
-A beginner-friendly tutorial lives in [`docs/`](docs/index.md). It covers web
+A beginner-friendly tutorial lives in [`docs/`](docs/index.html). It covers web
 fundamentals, Vite, Svelte, and a line-by-line walkthrough of this game.
 
-Run it locally:
+Open it locally by opening `docs/index.html` in a browser, or serve the folder
+with any static file server, for example:
 
 ```bash
-npm run docs:dev
+npx serve docs
 ```
 
 The docs site is deployed to GitHub Pages automatically via the

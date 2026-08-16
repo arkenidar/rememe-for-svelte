@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Introduction · Memory Game Tutorial</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="brand" href="index.html">Memory Game Tutorial</a>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="https://arkenidar.github.io/rememe-for-svelte/app/">Play the Game</a>
+                <a class="play" href="https://github.com/arkenidar/rememe-for-svelte">View the code</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="content wrap">
+        <h1>Introduction</h1>
+        <p>
+            Welcome! This tutorial teaches the fundamentals of modern web development by
+            building and explaining a simple <strong>Memory game</strong>. Along the way you'll learn
+            what the web is made of, why we use tools like <strong>Vite</strong>, and how the
+            <strong>Svelte</strong> framework helps you build interactive user interfaces.
+        </p>
+
+        <h2>What is a web page?</h2>
+        <p>
+            A web page is just a document that your browser downloads and renders. Modern
+            pages are built from three core technologies:
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Technology</th>
+                    <th>Role</th>
+                    <th>Analogy</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>HTML</strong></td>
+                    <td>Structure and content</td>
+                    <td>The skeleton of a body</td>
+                </tr>
+                <tr>
+                    <td><strong>CSS</strong></td>
+                    <td>Styling and layout</td>
+                    <td>The clothing and appearance</td>
+                </tr>
+                <tr>
+                    <td><strong>JavaScript</strong></td>
+                    <td>Behavior and interactivity</td>
+                    <td>The muscles that make things move</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>Let's look at each one.</p>
+
+        <h3>HTML</h3>
+        <p>
+            HTML (HyperText Markup Language) describes <em>what</em> is on the page using elements
+            called <strong>tags</strong>. Tags look like this:
+        </p>
+        <pre><code>&lt;button&gt;New Game&lt;/button&gt;
+&lt;div class="grid"&gt;...&lt;/div&gt;
+&lt;h1&gt;Memory Game&lt;/h1&gt;</code></pre>
+        <p>HTML is static by itself: it describes structure, not behavior.</p>
+
+        <h3>CSS</h3>
+        <p>CSS (Cascading Style Sheets) controls how HTML elements look. For example:</p>
+        <pre><code>button {
+  background: #5b8cff;
+  color: white;
+  border-radius: 8px;
+}</code></pre>
+        <p>This makes every <code>&lt;button&gt;</code> blue, white-texted, and rounded.</p>
+
+        <h3>JavaScript</h3>
+        <p>
+            JavaScript adds interactivity. It can listen for events (like a click), modify
+            the page, and manage the logic of your application. For example:
+        </p>
+        <pre><code>function flipCard(card) {
+  card.flipped = true; // change the card's state
+}</code></pre>
+        <p>Together these three — structure, style, and behavior — form every site you use.</p>
+
+        <h2>Why do we need a build tool?</h2>
+        <p>
+            You <em>could</em> write all three technologies in plain files and open them in a
+            browser. That works for tiny examples. But as projects grow, you benefit from a
+            <strong>build tool</strong> like <a href="https://vite.dev">Vite</a>:
+        </p>
+        <ul>
+            <li>
+                <strong>A development server</strong> that reloads your page instantly as you edit (called
+                <em>Hot Module Replacement</em>, or HMR).
+            </li>
+            <li><strong>Bundling</strong> — combining many small files into optimized output for production.</li>
+            <li>
+                <strong>Modern syntax support</strong> — you can write newer JavaScript and import modules,
+                and Vite handles browser compatibility.
+            </li>
+            <li>
+                <strong>Plugin ecosystem</strong> — Vite can transform special file types, such as
+                <code>.svelte</code> files, into plain JavaScript.
+            </li>
+        </ul>
+        <p>
+            Vite is fast because it serves modules natively during development, using the
+            browser's built-in ES module support.
+        </p>
+
+        <h2>Why use a framework like Svelte?</h2>
+        <p>
+            Plain JavaScript can manipulate the page directly, but as your interface grows
+            it becomes hard to keep the screen in sync with your data. That's where a UI
+            framework helps.
+        </p>
+        <p><strong>Svelte</strong> takes a distinctive approach:</p>
+        <ol>
+            <li>
+                You write <strong>components</strong> — self-contained files that combine markup, style,
+                and logic.
+            </li>
+            <li>
+                The framework tracks your <strong>state</strong> (data that can change over time) and
+                automatically updates the page when it changes. This is called <strong>reactivity</strong>.
+            </li>
+            <li>
+                Unlike many frameworks, Svelte does much of its work at <strong>build time</strong>: the
+                Svelte compiler converts your components into small, efficient JavaScript.
+                There's no big runtime library shipped to the browser.
+            </li>
+        </ol>
+
+        <div class="callout">
+            <p><span class="callout-title">Framework vs. library</span>
+                A <strong>library</strong> gives you functions you call when you want. A <strong>framework</strong>
+                provides the overall structure and calls <em>your</em> code. Svelte is a framework: you
+                write components, and it handles updating the DOM.
+            </p>
+        </div>
+
+        <h2>What we'll build</h2>
+        <p>Our example is a <strong>Memory game</strong>:</p>
+        <ul>
+            <li>A 4×4 grid of face-down cards.</li>
+            <li>Click two cards to flip them.</li>
+            <li>If they match, they stay revealed.</li>
+            <li>If they don't, they flip back after a short pause.</li>
+            <li>The game ends when all pairs are matched.</li>
+        </ul>
+        <p>
+            By the end of this tutorial you'll understand every file in this repo and be
+            able to extend the game with your own features.
+        </p>
+
+        <div class="pager">
+            <span></span>
+            <a href="02-setup-and-tooling.html">Next: Setup &amp; Tooling →</a>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>A beginner-friendly Vite + Svelte tutorial. MIT Licensed.</p>
+        </div>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Setup &amp; Tooling · Memory Game Tutorial</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="brand" href="index.html">Memory Game Tutorial</a>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="https://arkenidar.github.io/rememe-for-svelte/app/">Play the Game</a>
+                <a class="play" href="https://github.com/arkenidar/rememe-for-svelte">View the code</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="content wrap">
+        <h1>Setup &amp; Tooling</h1>
+        <p>
+            This page explains the tools you need, what they do, and how to run this project.
+            We'll cover <strong>Node.js</strong>, <strong>npm</strong>, <strong>Vite</strong>, and the scripts defined
+            in
+            <a
+                href="https://github.com/arkenidar/rememe-for-svelte/blob/main/package.json"><code>package.json</code></a>.
+        </p>
+
+        <h2>Prerequisites</h2>
+        <h3>Node.js</h3>
+        <p>
+            Node.js lets you run JavaScript outside the browser — on your computer. Build
+            tools like Vite run inside Node.js.
+        </p>
+        <p>Check whether Node is installed and which version you have:</p>
+        <pre><code>node --version</code></pre>
+        <p>
+            You should see a version number like <code>v20.x</code> or newer. If you don't have Node,
+            install it from <a href="https://nodejs.org">nodejs.org</a> (the LTS version is a safe
+            choice).
+        </p>
+
+        <h3>npm</h3>
+        <p>
+            <strong>npm</strong> (Node Package Manager) is a tool that installs and manages the
+            third-party packages your project depends on. It's included with Node.js.
+        </p>
+        <p>Check it with:</p>
+        <pre><code>npm --version</code></pre>
+
+        <h2>What is <code>package.json</code>?</h2>
+        <p><code>package.json</code> is the manifest of your project. It records:</p>
+        <ul>
+            <li>the project's <strong>name</strong> and <strong>version</strong>,</li>
+            <li>the <strong>scripts</strong> you can run,</li>
+            <li>
+                the <strong>dependencies</strong> (packages the project needs to run) and
+                <strong>devDependencies</strong> (packages needed only for development).
+            </li>
+        </ul>
+        <p>Here's the relevant part of this project's file:</p>
+        <pre><code>{
+  "name": "rememe-for-svelte",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^4.0.0",
+    "svelte": "^5.0.0",
+    "vite": "^5.0.0"
+  }
+}</code></pre>
+
+        <div class="callout">
+            <p><span class="callout-title">dependencies vs devDependencies</span></p>
+            <ul>
+                <li><strong>dependencies</strong> ship with your app in production.</li>
+                <li><strong>devDependencies</strong> are only used while developing and building.</li>
+            </ul>
+            <p>
+                Because this project is fully built ahead of time, everything is a
+                devDependency; the final bundle contains no Svelte/Vite runtime.
+            </p>
+        </div>
+
+        <h2>Installing dependencies</h2>
+        <pre><code>npm install</code></pre>
+        <p>
+            This reads <code>package.json</code>, downloads the listed packages into <code>node_modules/</code>,
+            and writes a <code>package-lock.json</code> file that pins exact versions for reproducible
+            installs.
+        </p>
+
+        <h2>The scripts</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Command</th>
+                    <th>What it does</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>npm run dev</code></td>
+                    <td>Starts Vite's development server with hot reload.</td>
+                </tr>
+                <tr>
+                    <td><code>npm run build</code></td>
+                    <td>Compiles the project into optimized files in <code>dist/</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>npm run preview</code></td>
+                    <td>Serves the built <code>dist/</code> output locally (for testing production).</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            The <code>dev</code>, <code>build</code>, and <code>preview</code> trio is the standard Vite lifecycle:
+        </p>
+        <ol>
+            <li><strong>Develop</strong> with instant reloading (<code>dev</code>).</li>
+            <li><strong>Build</strong> a production bundle (<code>build</code>).</li>
+            <li><strong>Verify</strong> the production bundle works (<code>preview</code>).</li>
+        </ol>
+
+        <h2>What is Vite?</h2>
+        <p>Vite (<code>vite.config.js</code> in this repo) is the build tool. It:</p>
+        <ul>
+            <li>provides the development server,</li>
+            <li>transforms <code>.svelte</code> files through the Svelte plugin,</li>
+            <li>bundles and minifies your code for production.</li>
+        </ul>
+        <p>Here's the whole config:</p>
+        <pre><code>import { defineConfig } from 'vite';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
+
+export default defineConfig({
+  plugins: [svelte()]
+});</code></pre>
+        <p>
+            This tells Vite: "when you see a <code>.svelte</code> file, use the Svelte plugin to
+            compile it."
+        </p>
+
+        <h2>Try it</h2>
+        <p>Start the game:</p>
+        <pre><code>npm install
+npm run dev</code></pre>
+        <p>To view this documentation, open <code>docs/index.html</code> in a browser, or serve
+            the <code>docs/</code> folder with any static file server.
+        </p>
+
+        <div class="pager">
+            <a href="01-introduction.html">← Previous: Introduction</a>
+            <a href="03-project-structure.html">Next: Project Structure →</a>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>A beginner-friendly Vite + Svelte tutorial. MIT Licensed.</p>
+        </div>
+    </footer>
+</body>
+
+</html>

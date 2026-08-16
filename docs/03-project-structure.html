@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Structure · Memory Game Tutorial</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="brand" href="index.html">Memory Game Tutorial</a>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="https://arkenidar.github.io/rememe-for-svelte/app/">Play the Game</a>
+                <a class="play" href="https://github.com/arkenidar/rememe-for-svelte">View the code</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="content wrap">
+        <h1>Project Structure</h1>
+        <p>
+            This page walks through every file in this repository. Understanding the layout
+            is the key to understanding how a Vite + Svelte app is assembled.
+        </p>
+        <p>
+            Here's the full tree (ignoring generated folders like <code>node_modules</code> and
+            <code>dist</code>):
+        </p>
+        <pre><code>rememe-for-svelte/
+├── .github/
+│   └── workflows/
+│       └── deploy-docs.yml      # GitHub Actions: builds & deploys this docs site
+├── docs/                        # Static HTML documentation (tutorial)
+│   ├── index.html               # Docs home page
+│   ├── 01-…07-….html            # Tutorial pages
+│   ├── style.css                # Docs stylesheet
+│   └── app/                     # Built game output (generated)
+├── src/                         # The actual app source
+│   ├── main.js                  # App entry point
+│   ├── app.css                  # Global styles
+│   ├── App.svelte               # Root component
+│   └── MemoryGame.svelte        # The Memory game
+├── index.html                   # HTML shell that loads the app
+├── package.json                 # Project manifest + scripts + dependencies
+├── package-lock.json            # Pinned dependency versions (generated)
+├── vite.config.js               # Vite configuration
+└── .gitignore                   # Files Git should ignore</code></pre>
+
+        <h2>The app entry: <code>index.html</code></h2>
+        <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+
+&lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+    &lt;title&gt;Memory Game&lt;/title&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+    &lt;div id="app"&gt;&lt;/div&gt;
+    &lt;script type="module" src="/src/main.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;</code></pre>
+        <p>Key points:</p>
+        <ul>
+            <li>
+                <code>&lt;div id="app"&gt;</code> is the <strong>mount point</strong> — the empty element where Svelte
+                puts
+                the app.
+            </li>
+            <li>
+                <code>&lt;script type="module" src="/src/main.js"&gt;</code> tells Vite to load <code>main.js</code> as
+                a
+                JavaScript <strong>module</strong>, which lets it use <code>import</code> statements.
+            </li>
+        </ul>
+
+        <h2>The JavaScript entry: <code>src/main.js</code></h2>
+        <pre><code>import { mount } from 'svelte';
+import App from './App.svelte';
+import './app.css';
+
+const app = mount(App, {
+  target: document.getElementById('app')
+});
+
+export default app;</code></pre>
+        <p>What happens here:</p>
+        <ol>
+            <li><code>mount</code> is imported from Svelte (Svelte 5's way of starting an app).</li>
+            <li><code>App</code> is imported from the root component file.</li>
+            <li>Global CSS is imported so it gets bundled.</li>
+            <li>
+                <code>mount(App, { target: ... })</code> renders the <code>App</code> component into the
+                <code>#app</code> element.
+            </li>
+        </ol>
+
+        <h2>The root component: <code>src/App.svelte</code></h2>
+        <pre><code>&lt;script&gt;
+  import MemoryGame from './MemoryGame.svelte';
+&lt;/script&gt;
+
+&lt;main&gt;
+  &lt;MemoryGame /&gt;
+&lt;/main&gt;
+
+&lt;style&gt;
+  main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+&lt;/style&gt;</code></pre>
+        <p>A <code>.svelte</code> file has three sections:</p>
+        <ul>
+            <li><strong><code>&lt;script&gt;</code></strong> — JavaScript logic and imports.</li>
+            <li><strong>markup</strong> — the HTML-like template (here, a <code>&lt;main&gt;</code> wrapping the game).
+            </li>
+            <li><strong><code>&lt;style&gt;</code></strong> — CSS scoped to this component.</li>
+        </ul>
+        <p>
+            <code>App.svelte</code> is a thin container: it imports and renders <code>MemoryGame</code>, and
+            centers it on the screen.
+        </p>
+
+        <h2>The game: <code>src/MemoryGame.svelte</code></h2>
+        <p>
+            This is the heart of the project. It holds the game state, the flip/matching
+            logic, the markup for the grid, and all the card styles. We'll explore it in
+            depth in <a href="05-memory-game-walkthrough.html">Memory Game Walkthrough</a>.
+        </p>
+
+        <h2>Global styles: <code>src/app.css</code></h2>
+        <pre><code>* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100vh;
+}
+
+body {
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    background: #1e1e2f;
+    color: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}</code></pre>
+        <p>
+            This is global CSS applied to the whole page: a CSS reset, a dark background,
+            and a system font stack. Component styles live in each <code>.svelte</code> file, while
+            site-wide rules live here.
+        </p>
+
+        <h2>Build config: <code>vite.config.js</code></h2>
+        <pre><code>import { defineConfig } from 'vite';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
+
+export default defineConfig({
+  plugins: [svelte()]
+});</code></pre>
+        <p>
+            The <code>svelte()</code> plugin tells Vite to compile <code>.svelte</code> files. Without it, Vite
+            would not understand Svelte syntax.
+        </p>
+
+        <h2>Identifiers &amp; git: <code>.gitignore</code></h2>
+        <pre><code>/node_modules
+/dist</code></pre>
+        <p>
+            Git ignores the <code>node_modules/</code> folder (installed packages) and the <code>dist/</code>
+            folder (build output). Both are regenerated from source.
+        </p>
+
+        <h2>The documentation: <code>docs/</code></h2>
+        <p>The <code>docs/</code> folder is a self-contained static HTML site. It contains:</p>
+        <ul>
+            <li><code>docs/index.html</code> — the homepage.</li>
+            <li><code>docs/01-…07-….html</code> — the tutorial pages you're reading.</li>
+            <li><code>docs/style.css</code> — the shared stylesheet.</li>
+        </ul>
+        <p>
+            The <code>docs/</code> folder is deployed directly to GitHub Pages by a GitHub Actions
+            workflow (see <a href="06-extending-the-game.html">deploy-docs.yml</a>), along with the
+            built game in <code>docs/app/</code>.
+        </p>
+
+        <div class="pager">
+            <a href="02-setup-and-tooling.html">← Previous: Setup &amp; Tooling</a>
+            <a href="04-svelte-basics.html">Next: Svelte Basics →</a>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>A beginner-friendly Vite + Svelte tutorial. MIT Licensed.</p>
+        </div>
+    </footer>
+</body>
+
+</html>

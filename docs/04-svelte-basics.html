@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Svelte Basics · Memory Game Tutorial</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="brand" href="index.html">Memory Game Tutorial</a>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="https://arkenidar.github.io/rememe-for-svelte/app/">Play the Game</a>
+                <a class="play" href="https://github.com/arkenidar/rememe-for-svelte">View the code</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="content wrap">
+        <h1>Svelte Basics</h1>
+        <p>
+            This page introduces the core Svelte concepts you need to read and modify this
+            game. It focuses on <strong>Svelte 5</strong>, the version used in this project.
+        </p>
+
+        <h2>Anatomy of a <code>.svelte</code> file</h2>
+        <p>A Svelte component is a file with up to three sections:</p>
+        <pre><code>&lt;script&gt;
+  // JavaScript logic
+&lt;/script&gt;
+
+&lt;!-- markup (HTML template) --&gt;
+&lt;div&gt;Hello!&lt;/div&gt;
+
+&lt;style&gt;
+  /* CSS scoped to this component */
+  div {
+    color: blue;
+  }
+&lt;/style&gt;</code></pre>
+        <ul>
+            <li>The <code>&lt;script&gt;</code> block holds logic.</li>
+            <li>The markup is ordinary HTML, with special Svelte templating added.</li>
+            <li>
+                The <code>&lt;style&gt;</code> block's CSS is <strong>scoped</strong>: it only applies to this component's
+                markup, so class names don't leak or collide.
+            </li>
+        </ul>
+
+        <h2>Components</h2>
+        <p>
+            A component can be imported and used inside another component. In
+            <code>App.svelte</code>:
+        </p>
+        <pre><code>&lt;script&gt;
+  import MemoryGame from './MemoryGame.svelte';
+&lt;/script&gt;
+
+&lt;main&gt;
+  &lt;MemoryGame /&gt;
+&lt;/main&gt;</code></pre>
+        <p>
+            Here <code>App</code> renders the <code>MemoryGame</code> component. This composability is the core of
+            component-based UI development.
+        </p>
+
+        <h2>State with <code>$state</code></h2>
+        <p>
+            <strong>State</strong> is data that can change over time. When state changes, Svelte
+            automatically updates anything on the screen that depends on it.
+        </p>
+        <p>In Svelte 5, you declare reactive state with the <code>$state</code> rune:</p>
+        <pre><code>let moves = $state(0);
+let cards = $state([]);
+let lock = $state(false);</code></pre>
+        <p>
+            These look like ordinary variables, but Svelte tracks them. Assigning a new
+            value — like <code>moves += 1</code> — triggers updates to the parts of the template that
+            reference <code>moves</code>.
+        </p>
+
+        <div class="callout">
+            <p><span class="callout-title">What is a rune?</span></p>
+            <p>
+                In Svelte 5, special functions prefixed with <code>$</code> (such as <code>$state</code>, <code>$derived</code>,
+                or <code>$effect</code>) are called <strong>runes</strong>. They tell the compiler to treat a variable
+                (and its usages) reactively.
+            </p>
+        </div>
+
+        <h2>Derived values and <code>$derived</code></h2>
+        <p>
+            When a value is computed from other state, you can derive it automatically. Our
+            game computes the win condition by comparing counters in the template instead,
+            but a derived value would look like:
+        </p>
+        <pre><code>let won = $derived(matchedPairs === EMOJIS.length);</code></pre>
+        <p>Whenever <code>matchedPairs</code> changes, <code>won</code> is recomputed.</p>
+
+        <h2>Lifecycle with <code>onMount</code></h2>
+        <p>
+            Sometimes you need to run code when a component first appears on the page.
+            Svelte provides lifecycle functions like <code>onMount</code>:
+        </p>
+        <pre><code>import { onMount } from 'svelte';
+
+onMount(() =&gt; {
+  newGame();
+});</code></pre>
+        <p>This starts a fresh game as soon as the component loads.</p>
+
+        <h2>Reactivity of arrays and objects</h2>
+        <p>
+            Reassigning a variable triggers an update. For arrays and objects used in
+            templates, make a new reference when you want the UI to reflect a change. In
+            the game:
+        </p>
+        <pre><code>flipped = [...flipped, card]; // new array reference -&gt; Svelte updates</code></pre>
+        <p>
+            Spreading (<code>...flipped</code>) creates a new array containing the old items plus the
+            new one. This explicit reassignment makes the update obvious.
+        </p>
+
+        <h2>Event handling with <code>onclick</code></h2>
+        <p>To react to a click, attach an event handler to an element:</p>
+        <pre><code>&lt;button onclick={() =&gt; flipCard(card)}&gt;Card&lt;/button&gt;</code></pre>
+        <p>
+            Svelte uses <code>onclick</code>, <code>oninput</code>, <code>onsubmit</code>, and so on — one <code>on</code>-prefixed
+            attribute per DOM event. The handler runs every time the event fires.
+        </p>
+
+        <h2>Template syntax</h2>
+        <p>Svelte extends HTML with <code>{}</code> expressions and block logic.</p>
+
+        <h3>Expressions</h3>
+        <p>Wrap JavaScript expressions in single braces to output them:</p>
+        <pre><code>&lt;span&gt;Moves: {moves}&lt;/span&gt;</code></pre>
+
+        <h3><code>{#if}</code> blocks</h3>
+        <p>Conditionally render markup:</p>
+        <pre><code>{#if matchedPairs === EMOJIS.length}
+  &lt;p class="win"&gt;You won in {moves} moves! 🎉&lt;/p&gt;
+{/if}</code></pre>
+
+        <h3><code>{#each}</code> blocks</h3>
+        <p>Render a list:</p>
+        <pre><code>{#each cards as card (card.id)}
+  &lt;button onclick={() =&gt; flipCard(card)}&gt;{card.value}&lt;/button&gt;
+{/each}</code></pre>
+        <p>
+            The <code>(card.id)</code> part is a <strong>keyed each</strong> block. The key tells Svelte which item
+            is which, so the list updates efficiently and correctly.
+        </p>
+
+        <h3>Class directives</h3>
+        <p>Toggle CSS classes based on state with the <code>class:</code> directive:</p>
+        <pre><code>&lt;button
+  class="card"
+  class:flipped={card.flipped || card.matched}
+  class:matched={card.matched}
+&gt;</code></pre>
+        <ul>
+            <li>If the expression is truthy, the class is added.</li>
+            <li>If falsy, it's removed.</li>
+        </ul>
+        <p>
+            This is how the game shows a card face-up (<code>flipped</code> class) or green
+            (<code>matched</code> class) without manual DOM manipulation.
+        </p>
+
+        <h2>Putting it together</h2>
+        <p>The game is a natural demonstration of every concept above:</p>
+        <ul>
+            <li><code>cards</code>, <code>moves</code>, <code>flipped</code>, and <code>lock</code> are <code>$state</code>.</li>
+            <li><code>flipCard</code> reacts to clicks.</li>
+            <li><code>{#each}</code> renders the card grid.</li>
+            <li><code>{#if}</code> shows the win message.</li>
+            <li><code>class:</code> directives control the visual state of each card.</li>
+        </ul>
+
+        <div class="pager">
+            <a href="03-project-structure.html">← Previous: Project Structure</a>
+            <a href="05-memory-game-walkthrough.html">Next: Memory Game Walkthrough →</a>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>A beginner-friendly Vite + Svelte tutorial. MIT Licensed.</p>
+        </div>
+    </footer>
+</body>
+
+</html>
