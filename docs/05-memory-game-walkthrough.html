@@ -88,13 +88,18 @@
 let flipped = $state([]);      // currently face-up cards (0–2)
 let moves = $state(0);         // number of attempts
 let matchedPairs = $state(0);  // how many pairs found
-let lock = $state(false);      // blocks input during the flip-back delay</code></pre>
+let lock = $state(false);      // true while a mismatch is resolving
+let mismatchTimer = null;      // id of the pending flip-back timer</code></pre>
         <ul>
             <li><code>cards</code> is the full deck.</li>
             <li><code>flipped</code> holds the one or two cards currently turned over.</li>
             <li><code>moves</code> counts every two-card attempt.</li>
             <li><code>matchedPairs</code> counts completed pairs (max 8).</li>
-            <li><code>lock</code> prevents clicks during the brief "not a match" pause.</li>
+            <li><code>lock</code> is true during the brief "not a match" pause.</li>
+            <li>
+                <code>mismatchTimer</code> stores the timer id so it can be cancelled on a restart
+                or when the player taps a third card early.
+            </li>
         </ul>
 
         <h2>Shuffling</h2>
@@ -144,19 +149,24 @@ let lock = $state(false);      // blocks input during the flip-back delay</code>
 
         <h2>Flipping a card</h2>
         <pre><code>function flipCard(card) {
-  if (lock) return;
   if (card.flipped || card.matched) return;
-  if (flipped.length &gt;= 2) return;
+
+  if (lock) {
+    resolveMismatch(); // tap during a mismatch: end it, then continue
+  }
 
   card.flipped = true;
   flipped = [...flipped, card];
   // ...
 }</code></pre>
-        <p>The first three lines are <strong>guards</strong> that reject invalid clicks:</p>
+        <p>Two checks run before a card is flipped:</p>
         <ol>
-            <li><code>if (lock)</code> — ignore clicks while two mismatched cards are resolving.</li>
             <li><code>if (card.flipped || card.matched)</code> — ignore cards already face up or matched.</li>
-            <li><code>if (flipped.length &gt;= 2)</code> — safety check: never allow more than two flipped.</li>
+            <li>
+                <code>if (lock)</code> — if two mismatched cards are still showing, end that mismatch
+                immediately (<code>resolveMismatch</code>) and treat this tap as the start of the next
+                move, so a fast player's tap is never dropped.
+            </li>
         </ol>
         <p>
             Then the card is flipped and added to the <code>flipped</code> array via a new reference
@@ -175,7 +185,8 @@ let lock = $state(false);      // blocks input during the flip-back delay</code>
     flipped = [];
   } else {
     lock = true;
-    setTimeout(() =&gt; {
+    mismatchTimer = setTimeout(() =&gt; {
+      mismatchTimer = null;
       first.flipped = false;
       second.flipped = false;
       flipped = [];
@@ -196,17 +207,38 @@ let lock = $state(false);      // blocks input during the flip-back delay</code>
         </ul>
         <p><strong>If they don't match:</strong></p>
         <ul>
-            <li><code>lock = true</code> freezes input so the player can't flip more cards yet.</li>
+            <li><code>lock = true</code> signals that a mismatch is being resolved.</li>
             <li>
-                <code>setTimeout</code> waits 800ms, then flips both back, clears <code>flipped</code>, and
-                unlocks.
+                <code>mismatchTimer = setTimeout(...)</code> waits 800ms, then flips both back, clears
+                <code>flipped</code>, and unlocks.
             </li>
         </ul>
 
+        <h2>Resolving a mismatch early</h2>
+        <pre><code>function resolveMismatch() {
+  if (mismatchTimer !== null) {
+    clearTimeout(mismatchTimer);
+    mismatchTimer = null;
+  }
+  for (const c of flipped) {
+    c.flipped = false;
+  }
+  flipped = [];
+  lock = false;
+}</code></pre>
+        <p>
+            <code>resolveMismatch</code> cancels the pending timer and flips the two cards back down
+            right away. It runs when the player taps a third card during the pause (so the tap starts
+            the next move instead of being ignored). <code>newGame</code> separately cancels the timer,
+            since a fresh deck is dealt anyway.
+        </p>
+
         <div class="callout warning">
-            <p><span class="callout-title">Why a lock?</span>
-                Without <code>lock</code>, a fast player could flip a third card during the 800ms pause.
-                That would corrupt the two-card logic. The lock makes the state machine safe.
+            <p><span class="callout-title">Why a lock + early resolution?</span>
+                Without <code>lock</code>, a fast player could flip a third card during the 800ms pause and
+                corrupt the two-card logic. The lock keeps the state machine safe, while
+                <code>resolveMismatch</code> keeps it responsive: instead of silently dropping a tap,
+                the game ends the pause immediately and uses that tap as the next move.
             </p>
         </div>
 
@@ -285,7 +317,8 @@ let lock = $state(false);      // blocks input during the flip-back delay</code>
         <pre><code>face-down cards → click → flip one → click → flip second
                                         ↓
                           match?  yes → matched (stay face up)
-                                   no  → lock → 800ms → flip both back</code></pre>
+                                   no  → lock → 800ms → flip both back
+                                         (or tap a card → flip back now, start the next move)</code></pre>
         <p>
             <code>$state</code> variables drive everything, <code>{#each}</code> renders the grid, <code>{#if}</code> shows
             the win message, and <code>class:</code> directives switch visual states. There's no manual

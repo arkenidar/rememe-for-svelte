@@ -86,15 +86,18 @@
             <li>Remember to remove the class when the cards flip back.</li>
         </ul>
 
-        <h2>5. Prevent flip-back on a quick double-click</h2>
-        <p><strong>Challenge:</strong> Make the "no match" reveal last longer, or let the player click
-            to dismiss it.</p>
+        <h2>5. Make the mismatch delay configurable</h2>
+        <p><strong>Challenge:</strong> Let the player choose how long a mismatched pair stays
+            revealed, or dismiss it faster.</p>
         <p><strong>Hints:</strong></p>
         <ul>
-            <li>Change the <code>setTimeout</code> delay to a variable.</li>
             <li>
-                Clear the timeout if the player clicks a third card while <code>lock</code> is true
-                (store the timeout id first).
+                The 800ms delay is a hard-coded number. Turn it into a <code>$state</code> variable
+                (e.g. <code>delay</code>) and read it in the <code>setTimeout</code> call.
+            </li>
+            <li>
+                The game already stores the timeout id in <code>mismatchTimer</code> and clears it when
+                the player taps a third card or restarts — so "tap to dismiss" is already built in.
             </li>
         </ul>
 
