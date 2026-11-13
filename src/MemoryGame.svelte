@@ -8,6 +8,7 @@
   let moves = $state(0);
   let matchedPairs = $state(0);
   let lock = $state(false);
+  let mismatchTimer = null; // id of the pending "flip back" timer, if any
 
   function shuffle(arr) {
     const copy = [...arr];
@@ -19,6 +20,10 @@
   }
 
   function newGame() {
+    if (mismatchTimer !== null) {
+      clearTimeout(mismatchTimer);
+      mismatchTimer = null;
+    }
     const deck = shuffle([...EMOJIS, ...EMOJIS]).map((value, id) => ({
       id,
       value,
@@ -50,7 +55,8 @@
         flipped = [];
       } else {
         lock = true;
-        setTimeout(() => {
+        mismatchTimer = setTimeout(() => {
+          mismatchTimer = null;
           first.flipped = false;
           second.flipped = false;
           flipped = [];
