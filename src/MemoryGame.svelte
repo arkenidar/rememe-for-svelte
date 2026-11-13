@@ -37,10 +37,28 @@
     lock = false;
   }
 
+  /* Flip a mismatched pair back down immediately. Used when the player taps a
+     third card before the pause ends, so a fast tap is never dropped. */
+  function resolveMismatch() {
+    if (mismatchTimer !== null) {
+      clearTimeout(mismatchTimer);
+      mismatchTimer = null;
+    }
+    for (const c of flipped) {
+      c.flipped = false;
+    }
+    flipped = [];
+    lock = false;
+  }
+
   function flipCard(card) {
-    if (lock) return;
     if (card.flipped || card.matched) return;
-    if (flipped.length >= 2) return;
+
+    if (lock) {
+      // A face-down card was tapped while a mismatch was still showing: end the
+      // pause now and treat this tap as the first card of the next move.
+      resolveMismatch();
+    }
 
     card.flipped = true;
     flipped = [...flipped, card];
